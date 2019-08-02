@@ -236,9 +236,9 @@ const parseAndDispatchEvent = async event => {
 export const getGroupEvents = async ({
   shouldGetMoreEvents,
   showNotification,
-  useLegacy
+  useLegacy = false
 }) => {
-  if (!useLegacy && needsUpgrade()) return
+  if (!useLegacy && needsUpgrade()) return;
   if (isGettingEvents && !shouldGetMoreEvents) return;
 
   isGettingEvents = true;
