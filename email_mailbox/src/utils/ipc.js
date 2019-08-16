@@ -56,6 +56,10 @@ export const restartConnection = async jwt => {
   await ipc.callMain('restart-connection', jwt);
 };
 
+export const restartAlice = async () => {
+  return await callMain('restart-alice');
+};
+
 export const sendEndSyncDevicesEvent = async () => {
   await ipc.callMain('close-create-keys-loading');
   return await ipc.callMain('end-sync-mailbox-event');
