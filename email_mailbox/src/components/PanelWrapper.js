@@ -8,11 +8,7 @@ import {
   checkUserGuideSteps
 } from '../utils/electronEventInterface';
 import { processPendingEvents } from '../utils/ipc';
-import {
-  LabelType,
-  needsUpgrade,
-  getPendingRestoreStatus
-} from '../utils/electronInterface';
+import { LabelType, getPendingRestoreStatus } from '../utils/electronInterface';
 import { SectionType } from '../utils/const';
 import {
   addLabels,
@@ -24,12 +20,12 @@ import {
 import { USER_GUIDE_STEPS } from './UserGuide';
 
 const MAILBOX_POPUP_TYPES = {
-  MIGRATE_ALICE: 'migrate-alice',
   ACCOUNT_DELETED: 'account-deleted',
   CREATING_BACKUP_FILE: 'creating-backup-file',
   DEVICE_REMOVED: 'device-removed',
-  PASSWORD_CHANGED: 'password-changed',
+  MIGRATE_ALICE: 'migrate-alice',
   ONLY_BACKDROP: 'only-backdrop',
+  PASSWORD_CHANGED: 'password-changed',
   RESTORE_BACKUP: 'restore-backup',
   SUSPENDED_ACCOUNT: 'suspended-account'
 };
@@ -40,17 +36,12 @@ const THREADS_SIZE = 22;
 class PanelWrapper extends Component {
   constructor(props) {
     super(props);
-
-    const mailboxType = needsUpgrade()
-      ? MAILBOX_POPUP_TYPES.MIGRATE_ALICE
-      : undefined;
-
     this.state = {
-      isHiddenMailboxPopup: !mailboxType,
+      isHiddenMailboxPopup: true,
       isOpenActivityPanel: false,
       isOpenSideBar: true,
       isOpenWelcome: true,
-      mailboxPopupType: mailboxType,
+      mailboxPopupType: undefined,
       sectionSelected: {
         type: SectionType.MAILBOX,
         params: {
@@ -233,6 +224,7 @@ class PanelWrapper extends Component {
     );
     addEvent(Event.RESTORE_BACKUP_INIT, this.restoreBackupInitListenerCallback);
     addEvent(Event.REFRESH_MAILBOX_SYNC, this.refreshMailboxSync);
+    addEvent(Event.MIGRATE_ALICE, this.migrateAliceListenerCallback);
   };
 
   removeEventHandlers = () => {
@@ -268,6 +260,7 @@ class PanelWrapper extends Component {
       this.restoreBackupInitListenerCallback
     );
     removeEvent(Event.REFRESH_MAILBOX_SYNC, this.refreshMailboxSync);
+    removeEvent(Event.MIGRATE_ALICE, this.migrateAliceListenerCallback);
   };
 
   enableWindowListenerCallback = () => {
@@ -546,6 +539,13 @@ class PanelWrapper extends Component {
       LabelType.inbox.id,
       LabelType.spam.id
     ]);
+  };
+
+  migrateAliceListenerCallback = () => {
+    this.setState({
+      isHiddenMailboxPopup: false,
+      mailboxPopupType: MAILBOX_POPUP_TYPES.MIGRATE_ALICE
+    });
   };
 }
 
