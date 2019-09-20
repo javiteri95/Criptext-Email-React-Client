@@ -131,6 +131,4 @@ ipc.answerRenderer('restart-connection', jwt => {
   checkAlive(true);
 });
 
-ipc.answerRenderer('restart-alice', () => {
-  restartAlice();
-});
+ipc.answerRenderer('restart-alice', restartAlice);
