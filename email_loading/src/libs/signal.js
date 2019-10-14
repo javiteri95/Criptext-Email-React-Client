@@ -160,9 +160,7 @@ const createAccountWithNewDevice = async ({
     await updateAccount({
       jwt: token,
       refreshToken,
-      recipientId,
-      isActive: true,
-      isLoggedIn: true
+      recipientId
     });
   } catch (createAccountDbError) {
     throw CustomError(string.errors.updateAccountData);

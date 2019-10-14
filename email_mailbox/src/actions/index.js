@@ -40,8 +40,6 @@ import {
 import {
   addEmails,
   loadEmails,
-  muteEmail,
-  muteNotifications,
   removeEmails,
   removeEmailsOnSuccess,
   unsendEmail,
@@ -100,8 +98,6 @@ export {
   loadSuggestions,
   loadThreads,
   moveThreads,
-  muteEmail,
-  muteNotifications,
   removeAllThreads,
   removeEmails,
   removeEmailsOnSuccess,
