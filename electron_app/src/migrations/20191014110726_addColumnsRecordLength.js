@@ -98,8 +98,8 @@ const removeRecordColumns = async knex => {
 };
 
 exports.up = async function(knex, Promise) {
-  const accountsCountRes = await knex.table(Table.ACCOUNT).count();
-  if (accountsCountRes[0]['count(*)'] > 0) {
+  const [account] = await knex.table(Table.ACCOUNT);
+  if (account && account.deviceId) {
     return Promise.resolve();
   }
   const addRecords = addRecordColumns(knex);

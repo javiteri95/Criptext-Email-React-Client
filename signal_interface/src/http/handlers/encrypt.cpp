@@ -7,6 +7,7 @@ int postEncryptKey(struct mg_connection *conn, void *cbdata, char *dbPath) {
     return 201;
   }
   
+  std::cout << "/encrypt/key Receiving Request" << std::endl;
   spdlog::info("[{0}] /encrypt/key Receiving Request", endpointId);
   string bufferData = parseBody(conn);
   int readLength = bufferData.length();

@@ -37,7 +37,7 @@ export const throwError = error => {
 };
 
 export const restartAlice = async () => {
-  return await callMain('restart-alice');
+  return await ipc.callMain('restart-alice');
 };
 
 /* Criptext Client

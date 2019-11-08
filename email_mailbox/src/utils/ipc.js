@@ -57,7 +57,7 @@ export const restartConnection = async jwt => {
 };
 
 export const restartAlice = async () => {
-  return await callMain('restart-alice');
+  return await ipc.callMain('restart-alice');
 };
 
 export const sendEndSyncDevicesEvent = async () => {
@@ -249,7 +249,7 @@ export const cleanDataLogout = async recipientId => {
 };
 
 export const migrateAlice = async () => {
-  return await callMain('db-migrate-alice');
+  return await ipc.callMain('db-migrate-alice');
 };
 
 export const createEmail = async params => {
@@ -549,5 +549,5 @@ export const reportContentUnencrypted = async error => {
 /* Migrate
 ----------------------------- */
 export const upgradeAccount = async params => {
-  return await callMain('upgrade-account', params);
+  return await ipc.callMain('upgrade-account', params);
 };

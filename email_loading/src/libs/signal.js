@@ -291,7 +291,15 @@ const encryptKeyForNewDevice = async ({ recipientId, deviceId, key }) => {
   const res = await aliceRequestWrapper(() => {
     return createSession({
       accountRecipientId: recipientId,
-      keybundles: [newKeyBundle]
+      keybundles: [
+        {
+          ...newKeyBundle,
+          recipientId:
+            newKeyBundle.domain === appDomain
+              ? newKeyBundle.recipientId
+              : `${newKeyBundle.recipientId}@${newKeyBundle.domain}`
+        }
+      ]
     });
   });
   if (res.status !== 200) {
