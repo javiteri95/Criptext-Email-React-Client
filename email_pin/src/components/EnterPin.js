@@ -40,7 +40,7 @@ class EnterPin extends Component {
               onChange={value => this.handleChange(value)}
               onComplete={value => this.handleComplete(value)}
               type={'text'}
-              values={this.pin}
+              values={[this.pin]}
             />
             {this.state.hasError && (
               <span className="error">{page_enter_pin.error}</span>
@@ -108,7 +108,7 @@ EnterPin.propTypes = {
   buttonState: PropTypes.string,
   onClickForgotPin: PropTypes.func,
   onClickOpen: PropTypes.func,
-  pin: PropTypes.string.optional
+  pin: PropTypes.string
 };
 
 export default EnterPin;

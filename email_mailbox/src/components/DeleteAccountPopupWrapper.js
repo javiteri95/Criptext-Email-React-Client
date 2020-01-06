@@ -77,6 +77,7 @@ class DeleteAccountPopupWrapper extends Component {
   };
 
   handleClickConfirmDeleteAccount = async () => {
+    console.log('handleClickConfirmDeleteAccount');
     const params = hashPassword(this.state.value);
     const { status } = await deleteMyAccount(params);
     if (status === 200) {

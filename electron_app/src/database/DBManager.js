@@ -911,6 +911,7 @@ const getEmailsGroupByThreadByParamsToSearch = (params = {}) => {
 };
 
 const getEmailsUnredByLabelId = params => {
+  console.log('OLD DB getEmailsUnredByLabelId');
   const { labelId, rejectedLabelIds } = params;
   const excludedLabels = [systemLabels.trash.id, systemLabels.spam.id];
   const isRejectedLabel = excludedLabels.includes(labelId);

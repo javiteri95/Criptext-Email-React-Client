@@ -925,7 +925,7 @@ const handleEmailTrackingUpdate = async ({ rowid, params }) => {
           emailId: email.id,
           contactId
         };
-        await createFeedItem([feedItemParams]);
+        await createFeedItem(feedItemParams);
         feedItemAdded = true;
       }
     }
@@ -1639,6 +1639,7 @@ export const handleDeleteDeviceData = async rowid => {
 };
 
 export const deleteAllDeviceData = async () => {
+  console.log('deleteAllDeviceData');
   await cleanDatabase();
   await logoutApp();
 };

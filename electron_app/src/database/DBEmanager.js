@@ -141,6 +141,7 @@ const getContactByEmails = (emails, trx) => {
   return Contact().findAll({
     attributes: ['id', 'email', 'score', 'spamScore'],
     where: { email: emails },
+    raw: true,
     transaction: trx
   });
 };
@@ -1143,6 +1144,25 @@ const getSessionRecordByRecipientIds = recipientIds => {
 
 /* Functions
 ----------------------------- */
+const cleanDataLogout = async recipientId => {
+  const params = {
+    deviceId: '',
+    jwt: '',
+    refreshToken: ''
+  };
+
+  return await getDB().transaction(async trx => {
+    await Account().update(params, {
+      where: { recipientId },
+      transaction: trx
+    });
+    await Prekeyrecord().destroy({ where: {}, transaction: trx });
+    await Signedprekeyrecord().destroy({ where: {}, transaction: trx });
+    await Sessionrecord().destroy({ where: {}, transaction: trx });
+    await Identitykeyrecord().destroy({ where: {}, transaction: trx });
+  });
+};
+
 const clearAndFormatDateEmails = emailObjOrArray => {
   let tempArr = [];
   const isAnEmailArray = Array.isArray(emailObjOrArray);
@@ -1269,6 +1289,7 @@ module.exports = {
   Table,
   Op,
   databasePath,
+  cleanDataLogout,
   createAccount,
   createContact,
   createContactsIfOrNotStore,

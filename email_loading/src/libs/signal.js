@@ -39,8 +39,10 @@ const createAccount = async ({
   deviceType,
   recoveryEmail
 }) => {
+  console.log('createAccount');
   const [currentAccount] = await getAccount();
   const username = currentAccount ? currentAccount.recipientId : null;
+  console.log('username', username);
   if (username) {
     await cleanDatabase(username);
   }
@@ -101,8 +103,11 @@ const createAcountAndGetKeyBundle = async ({
   deviceType,
   deviceId
 }) => {
+  console.log('createAcountAndGetKeyBundle');
   const [currentAccount] = await getAccount();
+  console.log('currentAccount', currentAccount);
   if (currentAccount && currentAccount.recipientId !== recipientId) {
+    console.log('in');
     await cleanDatabase(currentAccount.recipientId);
     await createTables();
   }
@@ -130,7 +135,6 @@ const createAcountAndGetKeyBundle = async ({
     deviceType,
     ...jsonRes
   };
-
   return keybundle;
 };
 
@@ -179,11 +183,11 @@ const generateAccountAndKeys = async ({
   deviceType,
   deviceId
 }) => {
-  const [currentAccount] = await getAccount();
-  if (currentAccount && currentAccount.recipientId !== recipientId) {
-    await cleanDatabase(currentAccount.recipientId);
-    await createTables();
-  }
+  // const [currentAccount] = await getAccount();
+  // if (currentAccount && currentAccount.recipientId !== recipientId) {
+  //   await cleanDatabase(currentAccount.recipientId);
+  //   await createTables();
+  // }
   const keybundle = await createAcountAndGetKeyBundle({
     recipientId,
     deviceId,
@@ -216,6 +220,12 @@ const createAccountToDB = async ({
   recipientId,
   isRecipientApp
 }) => {
+  console.log('createAccountToDB', name,
+  jwt,
+  refreshToken,
+  deviceId,
+  recipientId,
+  isRecipientApp);
   try {
     await updateAccount({
       jwt,
@@ -224,12 +234,14 @@ const createAccountToDB = async ({
       recipientId
     });
   } catch (createAccountDbError) {
+    console.log(createAccountDbError);
     throw CustomError(string.errors.updateAccountData);
   }
-  await createSystemLabels();
+  // await createSystemLabels();
   const email = isRecipientApp ? `${recipientId}@${appDomain}` : recipientId;
   await createOwnContact(name, email);
   const [newAccount] = await getAccount();
+  console.log('newAccount', newAccount);
   myAccount.initialize(newAccount);
   await setDefaultSettings();
 };

@@ -1,4 +1,4 @@
-const { BrowserWindow } = require('electron');
+const { app, BrowserWindow } = require('electron');
 const path = require('path');
 const { pinUrl } = require('../window_routing');
 const loginWindow = require('./login');
@@ -120,8 +120,13 @@ const setUpPin = async ({ pin, shouldSave, shouldExport, shouldResetPin }) => {
     await initDatabaseEncrypted({ key: pin });
   }
 
-  if (shouldExport) await encryptDataBase();
-  callEvent(EVENTS.Up_app, {});
+  if (shouldExport) {
+    await encryptDataBase();
+    app.relaunch();
+    app.exit(0);
+  } else {
+    callEvent(EVENTS.Up_app, {});
+  }
 };
 
 const checkPin = async () => {

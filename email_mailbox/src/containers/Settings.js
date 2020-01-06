@@ -4,11 +4,11 @@ import SettingsWrapper from './../components/SettingsWrapper';
 import { getCustomeLabels, getSystemLabelToEdit } from './../selectors/labels';
 import { addLabel, updateLabel, removeLabel } from './../actions';
 import {
-  cleanDataLogout,
   myAccount,
   mySettings
 } from '../utils/electronInterface';
 import {
+  cleanDataLogout,
   getUserSettings,
   logout,
   logoutApp,

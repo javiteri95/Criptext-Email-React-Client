@@ -127,6 +127,7 @@ class LoadingWrapper extends Component {
         try {
           this.incrementPercentage();
           const keybundle = await signal.generateAccountAndKeys(params);
+          console.log('keybundle', keybundle);
           if (!keybundle) {
             await cleanKeys();
             this.linkingDevicesThrowError();
@@ -141,6 +142,7 @@ class LoadingWrapper extends Component {
   };
 
   uploadKeys = keybundle => {
+    console.log('uploadKeys');
     this.setState(
       {
         message: messages.sendingKeys,
@@ -152,6 +154,7 @@ class LoadingWrapper extends Component {
         this.incrementPercentage();
         try {
           const accountData = await signal.uploadKeys(keybundle);
+          console.log('accountData', accountData);
           if (!accountData) {
             await cleanKeys();
             this.linkingDevicesThrowError();
@@ -198,6 +201,7 @@ class LoadingWrapper extends Component {
   };
 
   checkDataStatus = async () => {
+    console.log('checkDataStatus', DATA_STATUS_ATTEMPS);
     if (DATA_STATUS_ATTEMPS === 0) {
       this.setState({
         message: messages.keepWaiting.title,
@@ -206,6 +210,7 @@ class LoadingWrapper extends Component {
       });
     } else {
       const { status, body } = await getDataReady();
+      console.log('status', status);
       switch (status) {
         case DATA_READY_STATUS: {
           const { rowid } = body;
@@ -241,6 +246,7 @@ class LoadingWrapper extends Component {
   };
 
   downloadMailbox = (authorizerId, address, key) => {
+    console.log('downloadMailbox');
     clearTimeout(this.dataStatusTimeout);
     this.setState(
       {
@@ -253,6 +259,7 @@ class LoadingWrapper extends Component {
       async () => {
         this.incrementPercentage();
         const response = await downloadBackupFile(address);
+        console.log('response', response);
         if (response.statusCode !== 200) {
           this.linkingDevicesThrowError();
           return;
@@ -263,6 +270,7 @@ class LoadingWrapper extends Component {
   };
 
   decryptKey = (authorizerId, key) => {
+    console.log('decryptKey');
     this.setState(
       {
         message: messages.decryptingMailbox,
@@ -282,8 +290,10 @@ class LoadingWrapper extends Component {
             deviceId: authorizerId,
             messageType: MESSAGE_PRE_KEY
           });
+          console.log('decryptedKey', decryptedKey);
           this.processMailbox(authorizerId, decryptedKey);
         } catch (ex) {
+          console.log(ex);
           this.linkingDevicesThrowError();
         }
       }
@@ -291,6 +301,7 @@ class LoadingWrapper extends Component {
   };
 
   processMailbox = (authorizerId, decryptedKey) => {
+    console.log('processMailbox');
     this.setState(
       {
         message: messages.decryptingMailbox,

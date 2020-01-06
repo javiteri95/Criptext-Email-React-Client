@@ -160,12 +160,8 @@ class ComposerWrapper extends Component {
         status: composerData.status || Status.ENABLED
       };
     } else {
-      const composerData = await this.getDefaultComposerWithSignature();
-      this.signature = composerData.htmlBody;
-      const status = myAccount.signatureEnabled
-        ? Status.ENABLED
-        : Status.DISABLED;
-      state = { ...composerData, status };
+      state = await this.getDefaultComposerWithSignature();
+      this.signature = state.htmlBody;
     }
     fileManager.on(FILE_PROGRESS, this.handleUploadProgress);
     fileManager.on(FILE_FINISH, this.handleUploadSuccess);
