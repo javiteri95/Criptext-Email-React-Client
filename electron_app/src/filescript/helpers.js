@@ -2,7 +2,7 @@ const rimraf = require('rimraf');
 const crypto = require('crypto');
 const fs = require('fs');
 
-const CIPHER_ALGORITHM = 'aes128';
+const CIPHER_ALGORITHM = 'aes-128-cbc';
 const STREAM_SIZE = 512 * 1024;
 const DEFAULT_SALT_LENGTH = 8;
 const DEFAULT_IV_LENGTH = 16;
@@ -143,6 +143,51 @@ const decryptStreamFile = ({ inputFile, outputFile, password }) => {
   });
 };
 
+const encryptText = ({ text, password }) => {
+  return new Promise((resolve, reject) => {
+    try {
+      const { key, salt, iv } = generateKeyAndIvFromPassword(password);
+      const cipher = crypto.createCipheriv(CIPHER_ALGORITHM, key, iv);
+      const data = Buffer.concat([
+        salt,
+        iv,
+        cipher.update(text),
+        cipher.final()
+      ]);
+      resolve(data);
+    } catch (ex) {
+      reject(text);
+    }
+  });
+};
+
+const decryptText = ({ data, password }) => {
+  return new Promise(resolve => {
+    try {
+      const fileSalt = Buffer.from(data).slice(0, DEFAULT_SALT_LENGTH);
+      const fileIv = Buffer.from(data).slice(
+        DEFAULT_SALT_LENGTH,
+        DEFAULT_SALT_LENGTH + DEFAULT_IV_LENGTH
+      );
+      const result = generateKeyAndIvFromPassword(password, fileSalt);
+      const key = result.key;
+
+      const encryptedText = Buffer.from(data).slice(
+        DEFAULT_SALT_LENGTH + DEFAULT_IV_LENGTH
+      );
+      const cipher = crypto.createDecipheriv(CIPHER_ALGORITHM, key, fileIv);
+      const buffer = Buffer.concat([
+        cipher.update(encryptedText),
+        cipher.final()
+      ]);
+
+      resolve(buffer.toString());
+    } catch (ex) {
+      resolve(data.toString());
+    }
+  });
+};
+
 const remove = path => {
   return new Promise((resolve, reject) => {
     rimraf(path, err => {
@@ -167,6 +212,8 @@ module.exports = {
   decryptEncryptStreamFile,
   encryptStreamFile,
   decryptStreamFile,
+  encryptText,
+  decryptText,
   remove,
   sendMessage
 };
