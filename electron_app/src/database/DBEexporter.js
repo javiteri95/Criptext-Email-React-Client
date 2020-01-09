@@ -3,6 +3,7 @@ const zlib = require('zlib');
 const knex = require('knex');
 const crypto = require('crypto');
 const LineByLineReader = require('line-by-line');
+const globalManager = require('../globalManager');
 const moment = require('moment');
 const {
   Account,
@@ -604,11 +605,15 @@ const exportEmailTable = async () => {
         if (!newRow.boundary) delete newRow.boundary;
 
         const body =
-          (await getEmailBody({ username, metadataKey: newRow.key })) ||
-          newRow.content;
+          (await getEmailBody({
+            username,
+            metadataKey: newRow.key,
+            password: globalManager.databaseKey.get()
+          })) || newRow.content;
         const headers = await getEmailHeaders({
           username,
-          metadataKey: newRow.key
+          metadataKey: newRow.key,
+          password: globalManager.databaseKey.get()
         });
 
         const key = parseInt(newRow.key);

@@ -3,9 +3,10 @@ const copy = require('recursive-copy');
 const rmdirRecursive = require('rmdir-recursive');
 const path = require('path');
 const rimraf = require('rimraf');
+const { encryptText, decryptText } = require('../filescript/helpers');
 const { app } = require('electron');
 const { removeLast } = require('./stringUtils');
-const { APP_DOMAIN } = require('../utils/const');
+const { APP_DOMAIN } = require('./const');
 
 const getUserEmailsPath = (node_env, user) => {
   switch (node_env) {
@@ -41,6 +42,7 @@ const saveEmailBody = async ({
   body,
   headers,
   username,
+  password,
   metadataKey,
   replaceKey
 }) => {
@@ -50,22 +52,33 @@ const saveEmailBody = async ({
   await createIfNotExist(emailPath);
 
   const bodyPath = `${emailPath}/body.txt`;
-  await store(bodyPath, body);
+  const bodyToStore = !password
+    ? body
+    : await encryptText({ text: body, password });
+  await store(bodyPath, bodyToStore);
   if (headers) {
     const headersPath = `${emailPath}/headers.txt`;
-    await store(headersPath, headers);
+    const headersToStore = !password
+      ? body
+      : await encryptText({ text: headers, password });
+    await store(headersPath, headersToStore);
   }
   if (replaceKey) {
     await remove(`${myPath}/${replaceKey}`).catch(console.error);
   }
 };
 
-const getEmailBody = async ({ username, metadataKey }) => {
+const getEmailBody = async ({ username, metadataKey, password }) => {
   const myPath = await getUserEmailsPath(process.env.NODE_ENV, username);
 
   const emailPath = `${myPath}/${metadataKey}`;
   const bodyPath = `${emailPath}/body.txt`;
   try {
+    if (password) {
+      const data = await retrieveBuffer(bodyPath);
+      const body = decryptText({ data, password });
+      return body;
+    }
     const body = await retrieve(bodyPath);
     return body;
   } catch (ex) {
@@ -73,13 +86,18 @@ const getEmailBody = async ({ username, metadataKey }) => {
   }
 };
 
-const getEmailHeaders = async ({ username, metadataKey }) => {
+const getEmailHeaders = async ({ username, metadataKey, password }) => {
   const myPath = await getUserEmailsPath(process.env.NODE_ENV, username);
   const emailPath = `${myPath}/${metadataKey}`;
   const headersPath = `${emailPath}/headers.txt`;
   try {
-    const body = await retrieve(headersPath);
-    return body;
+    if (password) {
+      const data = await retrieveBuffer(headersPath);
+      const headers = decryptText({ data, password });
+      return headers;
+    }
+    const headers = await retrieve(headersPath);
+    return headers;
   } catch (ex) {
     return undefined;
   }
