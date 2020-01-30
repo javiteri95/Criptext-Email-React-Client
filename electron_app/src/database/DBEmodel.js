@@ -437,10 +437,10 @@ const initDatabaseEncrypted = async ({ key, shouldReset }) => {
   await sequelize.sync({});
 
   try {
-    const migrationPath = path.join(__dirname, '/migrations');
+    const migrationPath = path.join(__dirname, '/DBEmigrations');
     const migrator = new umzug({
       storage: 'json',
-      logging: console.log,
+      logging: false,
       upName: 'up',
       downName: 'down',
       migrations: {
@@ -448,10 +448,9 @@ const initDatabaseEncrypted = async ({ key, shouldReset }) => {
         path: migrationPath
       }
     });
-    const result = await migrator.up();
-    console.log('result : ', result);
+    await migrator.up();
   } catch (ex) {
-    console.log(ex);
+    console.error(ex);
   }
 };
 
