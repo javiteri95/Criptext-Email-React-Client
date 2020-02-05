@@ -436,6 +436,7 @@ const getEmailsCounterByLabelId = labelId => {
   });
 };
 
+// normal
 const getEmailsGroupByThreadByParams = async (params = {}) => {
   if (params.plain === false)
     return getEmailsGroupByThreadByParamsToSearch(params);
@@ -527,6 +528,172 @@ const getEmailsGroupByThreadByParams = async (params = {}) => {
     ${labelId > 0 ? `HAVING myAllLabels LIKE "%L${labelId}L%"` : ''}
     ORDER BY date DESC
     LIMIT ${limit || 22}`;
+
+  const threads = await sequelize.query(query, {
+    type: sequelize.QueryTypes.SELECT
+  });
+
+  const emailIds = threads.reduce((result, thread) => {
+    const emailIds = thread.emailIds;
+    return result ? `${result},${emailIds}` : emailIds;
+  }, '');
+  const files = await sequelize.query(
+    `SELECT ${Table.EMAIL}.threadId,
+    GROUP_CONCAT(DISTINCT(${Table.FILE}.token)) as fileTokens
+    FROM ${Table.EMAIL}
+    LEFT JOIN ${Table.FILE} ON ${Table.EMAIL}.id = ${Table.FILE}.emailId
+    WHERE ${Table.EMAIL}.id IN (${emailIds})
+    GROUP BY ${Table.EMAIL}.threadId`,
+    { type: sequelize.QueryTypes.SELECT }
+  );
+  const filesObj = files.reduce(
+    (result, element) => ({
+      ...result,
+      [element.threadId]: element
+    }),
+    {}
+  );
+  const contacts = await sequelize.query(
+    `SELECT ${Table.EMAIL}.threadId,
+    ${contactNameQuery}
+    GROUP_CONCAT(DISTINCT(${Table.CONTACT}.id)) as recipientContactIds
+    FROM ${Table.EMAIL}
+    LEFT JOIN ${Table.EMAIL_CONTACT} ON ${Table.EMAIL}.id = ${
+      Table.EMAIL_CONTACT
+    }.emailId AND (${Table.EMAIL_CONTACT}.type = "${
+      contactTypes[0]
+    }" ${emailContactOrQuery || ''})
+    LEFT JOIN ${Table.CONTACT} ON ${Table.EMAIL_CONTACT}.contactId = ${
+      Table.CONTACT
+    }.id
+    WHERE ${Table.EMAIL}.id IN (${emailIds})
+    GROUP BY ${Table.EMAIL}.threadId`,
+    { type: sequelize.QueryTypes.SELECT }
+  );
+  const contactsObj = contacts.reduce(
+    (result, element) => ({
+      ...result,
+      [element.threadId]: element
+    }),
+    {}
+  );
+  return threads.map(thread => {
+    return {
+      ...thread,
+      fileTokens: filesObj[thread.threadId].fileTokens,
+      fromContactName: contactsObj[thread.threadId].fromContactName,
+      recipientContactIds: contactsObj[thread.threadId].recipientContactIds
+    };
+  });
+};
+
+// tacho
+const getEmailsGroupByThreadByParams2 = async (params = {}) => {
+  if (params.plain === false)
+    return getEmailsGroupByThreadByParamsToSearch(params);
+  const sequelize = getDB();
+  const {
+    contactTypes = ['from'],
+    date,
+    labelId,
+    limit,
+    plain,
+    rejectedLabelIds,
+    threadIdRejected,
+    subject,
+    text,
+    unread
+  } = params;
+  const excludedLabels = [systemLabels.trash.id, systemLabels.spam.id];
+  const isRejectedLabel = excludedLabels.includes(labelId);
+  const systemLabelIdsExcludeStarred = Object.values(systemLabels)
+    .filter(label => label.id !== 5)
+    .map(label => label.id);
+  const allMailLabelId = -1;
+  const searchLabelId = -2;
+  systemLabelIdsExcludeStarred.push(allMailLabelId);
+  systemLabelIdsExcludeStarred.push(searchLabelId);
+  const isCustomLabel = !systemLabelIdsExcludeStarred.includes(labelId);
+
+  const labelSelectQuery = `GROUP_CONCAT(DISTINCT(${
+    Table.EMAIL_LABEL
+  }.labelId)) as labels,
+     GROUP_CONCAT(DISTINCT('L' || ${
+       Table.EMAIL_LABEL
+     }.labelId || 'L')) as myLabels`;
+
+  let customRejectedLabels =
+    'HAVING ' +
+    rejectedLabelIds
+      .map(rejectedLabelId => `myLabels not like "%L${rejectedLabelId}L%"`)
+      .join(' and ');
+  if (isRejectedLabel || isCustomLabel) {
+    customRejectedLabels += ` AND myLabels like "%L${labelId}L%"`;
+  }
+  customRejectedLabels += ` OR myLabels is null`;
+
+  let contactNameQuery;
+  if (contactTypes.includes('from')) {
+    contactNameQuery = `GROUP_CONCAT(DISTINCT(${
+      Table.EMAIL
+    }.fromAddress)) as fromContactName,`;
+  } else {
+    contactNameQuery = `GROUP_CONCAT(DISTINCT(${
+      Table.CONTACT
+    }.email)) as fromContactName,`;
+  }
+
+  const emailContactOrQuery = contactTypes[1]
+    ? `OR ${Table.EMAIL_CONTACT}.type = "${contactTypes[1]}"`
+    : null;
+
+  let query = '';
+  if (plain)
+    query += `
+          WITH SEARCH AS (
+              SELECT DISTINCT(threadId) as threadId
+              FROM ${Table.EMAIL}      
+              WHERE (
+                  preview LIKE "%${text}%" 
+                  OR subject LIKE "%${text}%" 
+                  OR fromAddress LIKE "%${text}%" ) 
+                  AND ${Table.EMAIL}.date < '${date || 'date("now")'}'
+            )
+            `;
+
+  query += `
+      SELECT *, 
+        MAX(unread) as unread, 
+        MAX(date) as maxDate,
+        GROUP_CONCAT(DISTINCT(id)) as emailIds,
+        GROUP_CONCAT(DISTINCT(myLabels)) as myAllLabels,
+        GROUP_CONCAT(DISTINCT(labels)) as allLabels
+      FROM (
+        SELECT ${Table.EMAIL}.*,
+          IFNULL(${Table.EMAIL}.threadId ,${Table.EMAIL}.id) as uniqueId,
+          ${labelSelectQuery}
+        FROM ${Table.EMAIL}
+        ${labelId < 0 ? 'LEFT' : ''} JOIN ${Table.EMAIL_LABEL} ON ${
+    Table.EMAIL
+  }.id = ${Table.EMAIL_LABEL}.emailId
+    ${threadIdRejected ? `AND uniqueId NOT IN ('${threadIdRejected}')` : ''}
+    ${
+      plain
+        ? ` INNER JOIN  SEARCH on ${Table.EMAIL}.threadId = SEARCH.threadId `
+        : ''
+    }
+    
+    WHERE ${Table.EMAIL}.date < '${date || 'date("now")'}'
+    ${subject ? `AND subject LIKE "%${subject}%"` : ''}
+    ${unread !== undefined ? `AND unread = ${unread}` : ''}
+    GROUP BY uniqueId, ${Table.EMAIL_LABEL}.emailId
+    ${customRejectedLabels}
+    ORDER BY ${Table.EMAIL}.date DESC
+  )
+  GROUP BY uniqueId
+  ${labelId > 0 ? `HAVING myAllLabels LIKE "%L${labelId}L%"` : ''}
+  ORDER BY date DESC
+  LIMIT ${limit || 22}`;
 
   const threads = await sequelize.query(query, {
     type: sequelize.QueryTypes.SELECT

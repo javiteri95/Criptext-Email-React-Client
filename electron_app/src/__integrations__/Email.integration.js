@@ -897,6 +897,98 @@ describe('Load data thread from Email Table:', () => {
     expect(specificFromFound.threadId).toBe(threadIdToSearch);
     expect(specificToFound.threadId).toBe(threadIdToSearch);
   });
+
+  it('should load all the thread: search', async () => {
+    const email1 = {
+      email: {
+        threadId: 'theThreadOfSearch',
+        key: '20',
+        subject: 'This is the email you are searching',
+        content: '<p>This is the email you are searching</p>',
+        preview: 'This is the email you are searching',
+        date: '2018-09-11 14:38:19.120',
+        status: 5,
+        unread: true,
+        secure: true,
+        unsentDate: '2018-06-14 08:23:20.000',
+        trashDate: null,
+        messageId: 'messageId20',
+        fromAddress: 'user@criptext.com'
+      },
+      recipients: {
+        from: ['user@criptext.com'],
+        to: ['usera@criptext.com']
+      },
+      labels: [6]
+    };
+
+    const email2 = {
+      email: {
+        threadId: 'theThreadOfSearch',
+        key: '21',
+        subject: 'Not related at all',
+        content: '<p>Not related at all</p>',
+        preview: 'Not related at all',
+        date: '2018-09-11 14:38:19.121',
+        status: 5,
+        unread: true,
+        secure: true,
+        unsentDate: '2018-06-14 08:23:20.000',
+        trashDate: null,
+        messageId: 'messageId21',
+        fromAddress: 'user@criptext.com'
+      },
+      recipients: {
+        from: ['user@criptext.com'],
+        to: ['usera@criptext.com']
+      },
+      labels: [6]
+    };
+
+    const email3 = {
+      email: {
+        threadId: 'theThreadOfSearch',
+        key: '22',
+        subject: 'Greetings',
+        content: '<p>Greetings</p>',
+        preview: 'Greetings',
+        date: '2018-09-11 14:38:19.122',
+        status: 5,
+        unread: true,
+        secure: true,
+        unsentDate: '2018-06-14 08:23:20.000',
+        trashDate: null,
+        messageId: 'messageId22',
+        fromAddress: 'user@criptext.com'
+      },
+      recipients: {
+        from: ['user@criptext.com'],
+        to: ['usera@criptext.com']
+      },
+      labels: [6]
+    };
+
+    await DBManager.createEmail(email1);
+    await DBManager.createEmail(email2);
+    await DBManager.createEmail(email3);
+
+    const theSearch = {
+      plain: true,
+      text: 'This is the email you are searching',
+      labelId: -2,
+      rejectedLabelIds: [2, 7]
+    };
+
+    const threadIdToSearch = 'theThreadOfSearch';
+    const emailsOfThread = await DBManager.getEmailsGroupByThreadByParams(
+      theSearch
+    );
+
+    expect(emailsOfThread).toHaveLength(3);
+    expect(emailsOfThread.map(email => email.threadId)).toEqual(
+      Array(3).fill(threadIdToSearch)
+    );
+  });
 });
 
 describe('Update data contact to Contact Table: ', () => {
