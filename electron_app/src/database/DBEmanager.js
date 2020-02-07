@@ -1196,15 +1196,15 @@ const deleteFeedItemById = id => {
   return Feeditem().destroy({ where: { id } });
 };
 
-const getAllFeedItems = () => {
+const getAllFeedItems = ({ accountId }) => {
   return Feeditem()
-    .findAll()
+    .findAll({ where: { accountId } })
     .map(feeditem => feeditem.toJSON());
 };
 
-const getFeedItemsCounterBySeen = (seen = false) => {
+const getFeedItemsCounterBySeen = ({ accountId, seen = false }) => {
   return Feeditem().count({
-    where: { seen }
+    where: { seen, accountId }
   });
 };
 
