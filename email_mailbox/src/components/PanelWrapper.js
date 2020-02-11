@@ -61,7 +61,7 @@ class PanelWrapper extends Component {
       }
     };
     this.initEventHandlers();
-    processPendingEvents();
+    processPendingEvents({});
   }
 
   render() {
