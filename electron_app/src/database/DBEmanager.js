@@ -1285,9 +1285,9 @@ const deletePendingEventsByIds = ids => {
 
 /* PreKeyRecord
 ----------------------------- */
-const getPreKeyRecordIds = () => {
+const getPreKeyRecordIds = ({ accountId }) => {
   return Prekeyrecord()
-    .findAll({ attributes: ['preKeyId'], raw: true })
+    .findAll({ where: { accountId }, attributes: ['preKeyId'], raw: true })
     .map(obj => obj.preKeyId);
 };
 
