@@ -1,6 +1,5 @@
 const path = require('path');
 const { BrowserWindow } = require('electron');
-const myAccount = require('../Account');
 const { composerUrl } = require('./../window_routing');
 const dbManager = require('./../database');
 const globalManager = require('./../globalManager');
@@ -11,7 +10,7 @@ const { filterInvalidEmailAddresses } = require('./../utils/EmailUtils');
 
 const lang = require('./../lang');
 const { windowTitle } = lang.strings.windows.composer;
-const accountId = 1;
+const myAccount = require('../Account');
 
 const composerSize = {
   width: 785,
@@ -124,7 +123,7 @@ const destroy = async ({
   emailId,
   threadId,
   hasExternalPassphrase,
-  _accountId
+  accountId
 }) => {
   const composer = BrowserWindow.fromId(composerId);
   const emailToEdit = globalManager.emailToEdit.get(composer.id);
@@ -142,7 +141,7 @@ const destroy = async ({
         const oldEmailId = oldDraftEmail.id;
         await dbManager.deleteEmailAndRelations({
           id: oldEmailId,
-          accountId: _accountId || accountId
+          accountId: accountId || myAccount.id
         });
       }
       event = 'composer-email-delete';
@@ -174,7 +173,7 @@ const sendEventToMailbox = (eventName, data) => {
 };
 
 const saveDraftToDatabase = async (composerId, data) => {
-  const _accountId = data.accountId || accountId;
+  const accountId = data.accountId || myAccount.id;
   const recipientId = myAccount.recipientId;
   const username = recipientId.includes('@')
     ? recipientId
@@ -188,7 +187,7 @@ const saveDraftToDatabase = async (composerId, data) => {
   const content = data.body;
   const dataDraft = Object.assign(data, {
     recipients: filteredRecipients,
-    accountId: _accountId
+    accountId
   });
   const emailToEdit = globalManager.emailToEdit.get(composerId);
   const { type, key } = emailToEdit || {};
@@ -205,7 +204,7 @@ const saveDraftToDatabase = async (composerId, data) => {
   } else {
     const [oldEmail] = await dbManager.getEmailByKey({
       key,
-      accountId: _accountId || accountId
+      accountId
     });
     const newDataDraft = Object.assign(dataDraft, {
       email: Object.assign(dataDraft.email, { key: oldEmail.key })
@@ -213,7 +212,7 @@ const saveDraftToDatabase = async (composerId, data) => {
     const newEmailId = await dbManager.deleteEmailAndRelations({
       id: oldEmail.id,
       optionalEmailToSave: newDataDraft,
-      accountId: _accountId || accountId
+      accountId
     });
     await fileUtils.saveEmailBody({
       body: content,
