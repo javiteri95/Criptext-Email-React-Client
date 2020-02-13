@@ -8,7 +8,6 @@ import PopupHOC from './PopupHOC';
 import AccountDeletedPopup from './AccountDeletedPopup';
 import CreatingBackupFilePopup from './CreatingBackupFilePopup';
 import DeviceRemovedPopup from './DeviceRemovedPopup';
-import MigrationPopupWrapper from './MigrationPopupWrapper';
 import PasswordChangedPopupWrapper from './PasswordChangedPopupWrapper';
 import RestoreBackupPopupWrapper from './RestoreBackupPopupWrapper';
 import SuspendedAccountPopup from './SuspendedAccountPopup';
@@ -87,18 +86,6 @@ const renderMailboxPopup = ({ type, isHidden, ...props }) => {
         />
       );
     }
-    case MAILBOX_POPUP_TYPES.MIGRATE_ALICE: {
-      const MigrationPopup = PopupHOC(MigrationPopupWrapper);
-      return (
-        <MigrationPopup
-          isHidden={isHidden}
-          isClosable={false}
-          theme={'dark'}
-          popupPosition={{ left: '50%', top: '50%' }}
-          onCloseMailboxPopup={props.onCloseMailboxPopup}
-        />
-      );
-    }
     case MAILBOX_POPUP_TYPES.ONLY_BACKDROP: {
       return <div className="mailbox-linking-devices-backdrop" />;
     }
@@ -153,7 +140,6 @@ const defineWrapperClass = (isOpenSideBar, isOpenActivityPanel) => {
 };
 
 renderMailboxPopup.propTypes = {
-  onCloseMailboxPopup: PropTypes.func,
   isHidden: PropTypes.bool,
   props: PropTypes.object,
   type: PropTypes.string
