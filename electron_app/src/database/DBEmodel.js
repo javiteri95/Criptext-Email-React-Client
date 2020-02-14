@@ -341,8 +341,9 @@ const initDatabaseEncrypted = async ({ key, shouldReset }) => {
 
   Identitykeyrecord.init(
     {
-      recipientId: { type: Sequelize.STRING, primaryKey: true },
-      deviceId: { type: Sequelize.INTEGER, primaryKey: true },
+      id: { type: Sequelize.INTEGER, primaryKey: true, autoIncrement: true },
+      recipientId: { type: Sequelize.STRING },
+      deviceId: { type: Sequelize.INTEGER },
       identityKey: Sequelize.STRING
     },
     {
@@ -372,7 +373,8 @@ const initDatabaseEncrypted = async ({ key, shouldReset }) => {
 
   Prekeyrecord.init(
     {
-      preKeyId: { type: Sequelize.INTEGER, primaryKey: true },
+      id: { type: Sequelize.INTEGER, primaryKey: true, autoIncrement: true },
+      preKeyId: { type: Sequelize.INTEGER },
       record: Sequelize.STRING,
       recordLength: Sequelize.INTEGER
     },
@@ -388,8 +390,9 @@ const initDatabaseEncrypted = async ({ key, shouldReset }) => {
 
   Sessionrecord.init(
     {
-      recipientId: { type: Sequelize.STRING, primaryKey: true },
-      deviceId: { type: Sequelize.INTEGER, primaryKey: true },
+      id: { type: Sequelize.INTEGER, primaryKey: true, autoIncrement: true },
+      recipientId: { type: Sequelize.STRING },
+      deviceId: { type: Sequelize.INTEGER },
       record: Sequelize.STRING,
       recordLength: Sequelize.INTEGER
     },
@@ -420,7 +423,8 @@ const initDatabaseEncrypted = async ({ key, shouldReset }) => {
 
   Signedprekeyrecord.init(
     {
-      signedPreKeyId: { type: Sequelize.INTEGER, primaryKey: true },
+      id: { type: Sequelize.INTEGER, primaryKey: true, autoIncrement: true },
+      signedPreKeyId: { type: Sequelize.INTEGER },
       record: Sequelize.STRING,
       recordLength: Sequelize.INTEGER
     },
