@@ -1397,7 +1397,7 @@ export const sendRestoreBackupInitEvent = () => {
 
 export const handleDeleteDeviceData = async rowid => {
   return await setTimeout(async () => {
-    await deleteAllDeviceData();
+    await deleteAllDeviceData(myAccount.recipientId);
     if (rowid) {
       return { rowid };
     }
@@ -1405,9 +1405,16 @@ export const handleDeleteDeviceData = async rowid => {
   }, 4000);
 };
 
-export const deleteAllDeviceData = async () => {
-  await cleanDatabase();
-  await logoutApp();
+export const deleteAllDeviceData = async recipientId => {
+  const nextAccount = await cleanDatabase(recipientId);
+  if (!nextAccount) {
+    await logoutApp();
+    return;
+  }
+  emitter.emit(Event.LOAD_APP, {
+    accountId: nextAccount.id,
+    recipientId: nextAccount.recipientId
+  });
 };
 
 export const sendRefreshMailboxSync = () => {
