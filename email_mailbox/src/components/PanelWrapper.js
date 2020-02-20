@@ -204,14 +204,30 @@ class PanelWrapper extends Component {
     });
   };
 
-  handleUpdateApp = ({ mailbox, accountId, recipientId }) => {
+  handleUpdateApp = async ({ mailbox, accountId, recipientId, threadId }) => {
     this.setState({
       isHiddenMailboxPopup: false,
       mailboxPopupType: MAILBOX_POPUP_TYPES.CHANGE_ACCOUNT
     });
     const mailboxSelected =
       mailbox || this.state.sectionSelected.params.mailboxSelected;
-    this.props.onUpdateAccountApp({ mailboxSelected, accountId, recipientId });
+    await this.props.onUpdateAccountApp({
+      mailboxSelected,
+      accountId,
+      recipientId
+    });
+    if (threadId) {
+      const threadType = SectionType.THREAD;
+      const openThreadParams = {
+        mailboxSelected: {
+          id: 1,
+          text: 'Inbox'
+        },
+        threadIdSelected: threadId
+      };
+      this.handleClickSection(threadType, openThreadParams);
+      this.props.onNotificationClicked({ threadId });
+    }
   };
 
   initEventHandlers = () => {
@@ -303,8 +319,8 @@ class PanelWrapper extends Component {
     this.props.onLoadEvents(params);
   };
 
-  loadAppListenerCallback = ({ mailbox, accountId, recipientId }) => {
-    this.handleUpdateApp({ mailbox, accountId, recipientId });
+  loadAppListenerCallback = ({ mailbox, accountId, recipientId, threadId }) => {
+    this.handleUpdateApp({ mailbox, accountId, recipientId, threadId });
   };
 
   refreshThreadsListenerCallback = eventParams => {
@@ -593,6 +609,7 @@ PanelWrapper.propTypes = {
   onUpdateLabels: PropTypes.func,
   onUnsendEmail: PropTypes.func,
   onUpdateAccountApp: PropTypes.func,
+  onNotificationClicked: PropTypes.func,
   onUpdateEmailIdsThread: PropTypes.func,
   onUpdateLoadingSync: PropTypes.func,
   onUpdateOpenedAccount: PropTypes.func,
