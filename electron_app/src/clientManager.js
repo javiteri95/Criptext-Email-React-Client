@@ -497,6 +497,13 @@ const resetPassword = async params => {
     : await checkExpiredSession(res, resetPassword, params);
 };
 
+const setAddress = async params => {
+  const res = await client.setAddress(params.username, params.domain);
+  return res.status === 200
+    ? res
+    : await checkExpiredSession(res, setAddress, params);
+};
+
 const sendRecoveryCode = async ({ newDeviceData, jwt }) => {
   const recipientId = getRecipientId(newDeviceData);
   const client = await createClient({ recipientId, optionalToken: jwt });
@@ -695,6 +702,7 @@ module.exports = {
   reportPhishing,
   resendConfirmationEmail,
   resetPassword,
+  setAddress,
   sendRecoveryCode,
   setReadTracking,
   setReplyTo,
