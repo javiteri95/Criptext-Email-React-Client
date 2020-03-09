@@ -1407,13 +1407,14 @@ const updateAlias = ({ id, rowId, active, accountId }) => {
 };
 
 const getAliasByParams = params => {
-  return Alias().findAll({ where: params }).then(aliases => {
-    return aliases.map(alias => alias.toJSON());
-  });
+  return Alias()
+    .findAll({ where: params })
+    .then(aliases => {
+      return aliases.map(alias => alias.toJSON());
+    });
 };
 
 const deleteAliases = ({ ids, rowIds, accountId }) => {
-  if (typeof active === 'undefined') return;
   const whereParam = ids
     ? { id: ids, accountId }
     : { rowId: rowIds, accountId };
@@ -1437,7 +1438,6 @@ const getCustomDomainByParams = params => {
 };
 
 const deleteCustomDomains = ({ ids, rowIds, accountId }) => {
-  if (typeof active === 'undefined') return;
   const whereParam = ids
     ? { id: ids, accountId }
     : { rowId: rowIds, accountId };
