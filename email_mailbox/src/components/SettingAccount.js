@@ -10,6 +10,7 @@ import SettingBlockManualSync from './SettingBlockManualSync';
 import SettingBlockProfile from '../containers/SettingBlockProfile';
 import SettingsAccountBackupWrapper from './SettingsAccountBackupWrapper';
 import SettingsAccountRestoreBackupc from './SettingsAccountRestoreBackup';
+import AliasesBlock from './SettingAliasBlock';
 import { getResendConfirmationTimestamp } from '../utils/storage';
 import string from './../lang';
 import './settingaccount.scss';
@@ -83,7 +84,9 @@ const SettingAccount = props => (
       onConfirmChangePassword={props.onConfirmChangePassword}
       onConfirmChangeRecoveryEmail={props.onConfirmChangeRecoveryEmail}
       onConfirmSetReplyTo={props.onConfirmSetReplyTo}
+      onConfirmDeleteAlias={props.onConfirmDeleteAlias}
       onShowSettingsPopup={props.onShowSettingsPopup}
+      deleteAliasParams={props.deleteAliasParams}
       setReplyToPopupParams={props.setReplyToPopupParams}
       onSetExportBackupPassword={props.onSetExportBackupPassword}
       onSelectBackupFolder={props.onSelectBackupFolder}
@@ -108,27 +111,6 @@ const CustomDomainsBlock = props => (
         }}
       >
         <span>{string.settings.custom_domains.add}</span>
-      </button>
-    </div>
-  </div>
-);
-
-const AliasesBlock = props => (
-  <div id="settings-account-domains" className="cptx-section-item">
-    <span className="cptx-section-item-title">
-      {string.settings.aliases.title}
-    </span>
-    <span className="cptx-section-item-description">
-      {string.settings.aliases.description}
-    </span>
-    <div className="cptx-section-item-control">
-      <button
-        className="button-b"
-        onClick={() => {
-          props.onChangePanel('alias');
-        }}
-      >
-        <span>{string.settings.aliases.add}</span>
       </button>
     </div>
   </div>
@@ -352,10 +334,6 @@ const RecoveryEmailConfirmationMessage = ({
   );
 };
 
-AliasesBlock.propTypes = {
-  onChangePanel: PropTypes.func
-};
-
 CustomDomainsBlock.propTypes = {
   onChangePanel: PropTypes.func
 };
@@ -425,6 +403,7 @@ RecoveryEmailConfirmationMessage.propTypes = {
 SettingAccount.propTypes = {
   changePasswordPopupParams: PropTypes.object,
   changeRecoveryEmailPopupParams: PropTypes.object,
+  deleteAliasParams: PropTypes.object,
   devicesQuantity: PropTypes.number,
   isEnterprise: PropTypes.bool,
   isHiddenSettingsPopup: PropTypes.bool,
@@ -438,6 +417,7 @@ SettingAccount.propTypes = {
   onClosePopup: PropTypes.func,
   onConfirmChangePassword: PropTypes.func,
   onConfirmChangeRecoveryEmail: PropTypes.func,
+  onConfirmDeleteAlias: PropTypes.func,
   onConfirmSetReplyTo: PropTypes.func,
   onSelectBackupFolder: PropTypes.func,
   onSetExportBackupPassword: PropTypes.func,

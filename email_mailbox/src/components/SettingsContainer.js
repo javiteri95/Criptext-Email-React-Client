@@ -5,7 +5,12 @@ import CustomDomains from './CustomDomains';
 import AliasesWrapper from './AliasesWrapper';
 import SettingsHOC from './SettingsHOC';
 import { myAccount } from '../utils/electronInterface';
-import { sendRemoveDeviceErrorMessage } from '../utils/electronEventInterface';
+import {
+  sendRemoveDeviceErrorMessage,
+  sendAliasSuccessStatusMessage
+} from '../utils/electronEventInterface';
+import { getAlias, updateAlias, activateAddress } from '../utils/ipc';
+import { appDomain } from '../utils/const';
 
 const Setting = SettingsHOC(Settings);
 const Domains = SettingsHOC(CustomDomains);
@@ -23,6 +28,7 @@ class SettingsContainer extends Component {
     this.state = {
       panel: PANEL.SETTINGS,
       devices: [],
+      aliasesByDomain: {},
       recoveryEmail: myAccount.recoveryEmail,
       recoveryEmailConfirmed: !!myAccount.recoveryEmailConfirmed,
       twoFactorAuth: undefined,
@@ -47,6 +53,7 @@ class SettingsContainer extends Component {
             isHiddenSettingsPopup={this.state.isHiddenSettingsPopup}
             titlePath={PANEL.ALIAS}
             onChangePanel={this.handleChangePanel}
+            onAddAlias={this.handleAddAlias}
           />
         );
       default:
@@ -55,13 +62,16 @@ class SettingsContainer extends Component {
             {...this.props}
             titlePath={myAccount.email}
             devices={this.state.devices}
+            aliasesByDomain={this.state.aliasesByDomain}
             isHiddenSettingsPopup={this.state.isHiddenSettingsPopup}
+            onChangeAliasStatus={this.handleChangeAliasStatus}
             onChangePanel={this.handleChangePanel}
             onClickCheckForUpdates={this.props.onCheckForUpdates}
             onClickLogout={this.handleClickLogout}
             onClickSection={this.handleClickSection}
             onClosePopup={this.handleClosePopup}
             onConfirmLogout={this.handleConfirmLogout}
+            onRemoveAlias={this.handleRemoveAlias}
             onRemoveDevice={this.handleRemoveDevice}
             recoveryEmail={this.state.recoveryEmail}
             recoveryEmailConfirmed={this.state.recoveryEmailConfirmed}
@@ -75,15 +85,39 @@ class SettingsContainer extends Component {
   }
 
   async componentDidMount() {
+    const res = await this.props.onGetUserSettings();
     const {
+      aliases,
       devices,
       recoveryEmail,
       twoFactorAuth,
       recoveryEmailConfirmed,
       readReceiptsEnabled,
       replyToEmail
-    } = await this.props.onGetUserSettings();
+    } = res;
+
+    const myAliases = await getAlias({});
+    const rowIds = new Set();
+    const aliasesWithDomain = myAliases.map(alias => {
+      return {
+        ...alias,
+        domain: alias.domain || appDomain
+      };
+    });
+    const aliasesByDomain = [...aliasesWithDomain, ...aliases].reduce(
+      (result, alias) => {
+        if (rowIds.has(alias.rowId)) return result;
+        const aliasDomain = alias.domain || appDomain;
+        if (!result[aliasDomain]) result[aliasDomain] = [];
+        result[aliasDomain].push(alias);
+        rowIds.add(alias.rowId);
+        return result;
+      },
+      {}
+    );
+
     this.setState({
+      aliasesByDomain,
       devices,
       recoveryEmail,
       recoveryEmailConfirmed,
@@ -92,6 +126,63 @@ class SettingsContainer extends Component {
       replyToEmail
     });
   }
+
+  handleAddAlias = alias => {
+    const aliasDomain = alias.domain || appDomain;
+    const aliasesByDomain = { ...this.state.aliasesByDomain };
+    if (!aliasesByDomain[aliasDomain]) aliasesByDomain[aliasDomain] = [];
+    aliasesByDomain[aliasDomain].push(alias);
+    this.setState({
+      aliasesByDomain
+    });
+  };
+
+  handleRemoveAlias = (addressId, email) => {
+    const domain = email.split('@')[1];
+    const aliasesByDomain = { ...this.state.aliasesByDomain };
+    if (!aliasesByDomain[domain]) return;
+    aliasesByDomain[domain] = aliasesByDomain[domain].filter(
+      alias => alias.rowId !== addressId
+    );
+    if (aliasesByDomain[domain].length === 0) delete aliasesByDomain[domain];
+    this.setState({
+      aliasesByDomain
+    });
+  };
+
+  handleChangeAliasStatus = (rowId, domain, active) => {
+    const aliasDomain = domain || appDomain;
+    const aliasesByDomain = { ...this.state.aliasesByDomain };
+    if (!aliasesByDomain[aliasDomain]) aliasesByDomain[aliasDomain] = [];
+    const index = aliasesByDomain[aliasDomain].findIndex(
+      alias => alias.rowId === rowId
+    );
+    aliasesByDomain[aliasDomain][index].active = active;
+    this.setState(
+      {
+        aliasesByDomain
+      },
+      async () => {
+        const result = await activateAddress({
+          rowId,
+          active
+        });
+        if (result && result.status === 200) {
+          await updateAlias({
+            rowId,
+            active
+          });
+          sendAliasSuccessStatusMessage(active);
+        } else {
+          aliasesByDomain[aliasDomain][index].active = !active;
+          this.setState({
+            aliasesByDomain
+          });
+          sendAliasSuccessStatusMessage(!active);
+        }
+      }
+    );
+  };
 
   handleChangePanel = panel => {
     this.setState({

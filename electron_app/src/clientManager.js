@@ -155,6 +155,13 @@ const checkExpiredSession = async (
   }
 };
 
+const activateAddress = async ({ rowId, active }) => {
+  const res = await client.activateAddress(rowId, active);
+  return res.status === 200
+    ? res
+    : await checkExpiredSession(res, activateAddress, { rowId, active });
+};
+
 const acknowledgeEvents = async eventIds => {
   const res = await client.acknowledgeEvents(eventIds);
   return res.status === 200
@@ -182,6 +189,13 @@ const changePassword = async params => {
 
 const checkAvailableUsername = async username => {
   return await client.checkAvailableUsername(username);
+};
+
+const deleteAddress = async addressId => {
+  const res = await client.deleteAddress(addressId);
+  return res.status === 200
+    ? res
+    : await checkExpiredSession(res, deleteAddress, addressId);
 };
 
 const deleteDeviceToken = async params => {
@@ -247,7 +261,7 @@ const getUserSettings = async () => {
 };
 
 const parseUserSettings = settings => {
-  const { devices, general } = settings;
+  const { devices, general, addresses } = settings;
   const {
     recoveryEmail,
     recoveryEmailConfirmed,
@@ -257,6 +271,7 @@ const parseUserSettings = settings => {
   } = general;
   return {
     devices,
+    addresses,
     twoFactorAuth: !!twoFactorAuth,
     recoveryEmail,
     recoveryEmailConfirmed: !!recoveryEmailConfirmed,
@@ -566,12 +581,14 @@ const validateRecoveryCode = async ({ newDeviceData, jwt }) => {
 };
 
 module.exports = {
+  activateAddress,
   acknowledgeEvents,
   canLogin,
   changePassword,
   changeRecoveryEmail,
   checkAvailableUsername,
   checkExpiredSession,
+  deleteAddress,
   deleteDeviceToken,
   deleteMyAccount,
   findDevices,

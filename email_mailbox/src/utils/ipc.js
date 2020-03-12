@@ -161,6 +161,9 @@ export const storeRecoveryKey = async params => {
 
 /* Criptext Client
 ----------------------------- */
+export const activateAddress = async params => {
+  return await ipc.callMain('client-activate-address', params);
+};
 export const acknowledgeEvents = async eventIds => {
   return await ipc.callMain('client-acknowledge-events', eventIds);
 };
@@ -175,6 +178,10 @@ export const changeRecoveryEmail = async params => {
 
 export const checkExpiredSession = async params => {
   return await ipc.callMain('client-check-expired-session', params);
+};
+
+export const deleteAddress = async addressId => {
+  return await ipc.callMain('client-delete-address', addressId);
 };
 
 export const deleteMyAccount = async password => {
@@ -279,6 +286,14 @@ export const cleanDataLogout = async params => {
   return await ipc.callMain('db-clean-data-logout', params);
 };
 
+export const createAlias = async params => {
+  return await ipc.callMain('db-create-alias', params);
+};
+
+export const getAlias = async params => {
+  return await ipc.callMain('db-get-alias-by-params', params);
+};
+
 export const createEmail = async params => {
   return await ipc.callMain('db-create-email', params);
 };
@@ -313,6 +328,10 @@ export const createSignedPreKeyRecord = async params => {
 
 export const deleteEmailByKeys = async params => {
   return await ipc.callMain('db-delete-email-by-keys', params);
+};
+
+export const deleteAliases = async params => {
+  return await ipc.callMain('db-delete-alias', params);
 };
 
 export const deleteEmailLabel = async params => {
@@ -461,6 +480,10 @@ export const unsendEmail = async params => {
 
 export const updateAccount = async params => {
   return await ipc.callMain('db-update-account', params);
+};
+
+export const updateAlias = async params => {
+  return await ipc.callMain('db-update-alias', params);
 };
 
 export const updateContactByEmail = async ({ email, name }) => {

@@ -2,6 +2,10 @@ const { ipcMain: ipc } = require('@criptext/electron-better-ipc');
 const clientManager = require('./../clientManager');
 const myAccount = require('../Account');
 
+ipc.answerRenderer('client-activate-address', params =>
+  clientManager.activateAddress(params)
+);
+
 ipc.answerRenderer('client-acknowledge-events', params =>
   clientManager.acknowledgeEvents(params)
 );
@@ -26,6 +30,10 @@ ipc.answerRenderer(
   'client-check-expired-session',
   ({ response, initialRequest, requestParams }) =>
     clientManager.checkExpiredSession(response, initialRequest, requestParams)
+);
+
+ipc.answerRenderer('client-delete-address', addressId =>
+  clientManager.deleteAddress(addressId)
 );
 
 ipc.answerRenderer('client-delete-device-token', params =>
