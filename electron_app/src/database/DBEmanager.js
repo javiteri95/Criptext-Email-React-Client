@@ -1394,6 +1394,14 @@ const getSessionRecordByRecipientIds = ({ accountId, recipientIds }) => {
   });
 };
 
+const getSessionRecordRowsByRecipientIds = ({ accountId, recipientIds }) => {
+  return Sessionrecord().findAll({
+    attributes: ['recipientId', 'deviceId'],
+    where: { recipientId: recipientIds, accountId },
+    raw: true
+  });
+};
+
 /* Alias
 ----------------------------- */
 const createAlias = params => {
@@ -1805,6 +1813,7 @@ module.exports = {
   getPendingEvents,
   getPreKeyRecordIds,
   getSessionRecordByRecipientIds,
+  getSessionRecordRowsByRecipientIds,
   getSettings,
   getTrashExpiredEmails,
   initDatabaseEncrypted: InitDatabaseEncrypted,
