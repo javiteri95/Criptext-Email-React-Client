@@ -239,6 +239,13 @@ const getDataReady = async () => {
     : await checkExpiredSession(res, getDataReady, null);
 };
 
+const getDomainMX = async domain => {
+  const res = await client.getDomainMX(domain);
+  return res.status === 200
+    ? res
+    : await checkExpiredSession(res, getDomainMX, domain);
+};
+
 const getEmailBody = async bodyKey => {
   const res = await client.getEmailBody(bodyKey);
   return res.status === 200
@@ -260,6 +267,10 @@ const getUserSettings = async () => {
     : await checkExpiredSession(res, getUserSettings, null);
 };
 
+const isDomainAvailable = async domain => {
+  const request = { domain: { name: domain } };
+  return await client.isDomainAvailable(request);
+};
 const parseUserSettings = settings => {
   const { devices, general, addresses } = settings;
   const {
@@ -405,6 +416,13 @@ const pushPeerEvents = async events => {
 
 const postUser = async params => {
   return await client.postUser(params);
+};
+
+const registerDomain = async domain => {
+  const res = await client.registerDomain(domain);
+  return res.status === 200
+    ? res
+    : await checkExpiredSession(res, registerDomain, domain);
 };
 
 const removeAvatar = async () => {
@@ -573,6 +591,13 @@ const unsendEmail = async params => {
     : await checkExpiredSession(res, unsendEmail, params);
 };
 
+const validateDomainMX = async domain => {
+  const res = await client.validateDomainMX(domain);
+  return res.status === 200
+    ? res
+    : await checkExpiredSession(res, validateDomainMX, domain);
+};
+
 const validateRecoveryCode = async ({ newDeviceData, jwt }) => {
   const { recipientId } = newDeviceData;
   const client = await createClient({ recipientId, optionalToken: jwt });
@@ -595,12 +620,14 @@ module.exports = {
   findKeyBundles,
   generateEvent,
   getDataReady,
+  getDomainMX,
   getEmailBody,
   getKeyBundle,
   getUserSettings,
   initClient,
   insertPreKeys,
   isCriptextDomain,
+  isDomainAvailable,
   linkAccept,
   linkAuth,
   linkBegin,
@@ -616,6 +643,7 @@ module.exports = {
   postPeerEvent,
   pushPeerEvents,
   postUser,
+  registerDomain,
   removeAvatar,
   removeDevice,
   reportPhishing,
@@ -637,5 +665,6 @@ module.exports = {
   updatePushToken,
   uploadAvatar,
   unsendEmail,
+  validateDomainMX,
   validateRecoveryCode
 };
