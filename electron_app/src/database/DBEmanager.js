@@ -1445,7 +1445,7 @@ const getCustomDomainByParams = params => {
   return CustomDomain().findAll({ where: params });
 };
 
-const deleteCustomDomains = ({ ids, rowIds, accountId }) => {
+const deleteCustomDomainsByIds = ({ ids, rowIds, accountId }) => {
   const whereParam = ids
     ? { id: ids, accountId }
     : { rowId: rowIds, accountId };
@@ -1459,6 +1459,12 @@ const deleteCustomDomainByName = ({ name, accountId }) => {
       accountId
     }
   });
+};
+
+const deleteCustomDomains = params => {
+  const { domain, accountId } = params;
+  const whereParam = { name: domain, accountId };
+  return CustomDomain().destroy({ where: whereParam });
 };
 
 /* Functions
@@ -1776,6 +1782,7 @@ module.exports = {
   deleteAccountNotSignalRelatedData,
   defineActiveAccountById,
   deleteAliases,
+  deleteCustomDomainsByIds,
   deleteCustomDomains,
   deleteCustomDomainByName,
   deleteDatabase,

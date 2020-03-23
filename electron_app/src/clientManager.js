@@ -205,6 +205,13 @@ const deleteDeviceToken = async params => {
     : await checkExpiredSession(res, deleteDeviceToken, params);
 };
 
+const deleteDomain = async domain => {
+  const res = await client.deleteDomain(domain);
+  return res.status === 200
+    ? res
+    : await checkExpiredSession(res, deleteDomain, domain);
+};
+
 const deleteMyAccount = async password => {
   const res = await client.deleteMyAccount(password);
   return res.status === 200
@@ -615,6 +622,7 @@ module.exports = {
   checkExpiredSession,
   deleteAddress,
   deleteDeviceToken,
+  deleteDomain,
   deleteMyAccount,
   findDevices,
   findKeyBundles,
