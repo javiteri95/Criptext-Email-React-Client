@@ -1452,6 +1452,15 @@ const deleteCustomDomains = ({ ids, rowIds, accountId }) => {
   return CustomDomain().destroy({ where: whereParam });
 };
 
+const deleteCustomDomainByName = ({ name, accountId }) => {
+  return CustomDomain().destroy({
+    where: {
+      name,
+      accountId
+    }
+  });
+};
+
 /* Functions
 ----------------------------- */
 const cleanDataBase = async recipientId => {
@@ -1768,6 +1777,7 @@ module.exports = {
   defineActiveAccountById,
   deleteAliases,
   deleteCustomDomains,
+  deleteCustomDomainByName,
   deleteDatabase,
   deleteEmailsByIds,
   deleteEmailByKeys,
