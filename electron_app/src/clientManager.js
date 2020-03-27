@@ -627,7 +627,7 @@ const syncStatus = async recipientId => {
   const res = await client.syncStatus();
   return res.status === 200
     ? res
-    : await checkExpiredSession(res, syncStatus, null);
+    : await checkExpiredSession(res, syncStatus, recipientId);
 };
 
 const unlockDevice = async params => {
