@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import Aliases from './Aliases';
 import { setAddress, createAlias, getCustomDomainByParams } from '../utils/ipc';
 import { appDomain } from '../utils/const';
-import { usernameRegex } from '../utils/RegexUtils';
+import { aliasNameRegex  } from '../utils/RegexUtils';
 import string from '../lang';
 
 const { errors } = string.alias.add;
@@ -59,7 +59,7 @@ class AliasesWrapper extends Component {
   handleChangeInput = ev => {
     const value = ev.target.value.toLowerCase();
     const error =
-      value.length > 3 && !usernameRegex.test(value)
+      value.length > 3 && !aliasNameRegex.test(value)
         ? errors.invalid
         : undefined;
     this.setState({

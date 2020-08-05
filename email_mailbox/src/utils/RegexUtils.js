@@ -2,5 +2,5 @@
 export const emailRegex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 export const HTMLTagsRegex = /<[^>]*>?/g;
 export const mimeTypeImageRegex = /image\/([a-z][-+])*/;
-export const usernameRegex = /(?=^([a-z0-9]([._-]{0,2}[a-z0-9])+)$)(?:^.{3,16}$)$/;
+export const aliasNameRegex = /(?=^([a-z0-9]([._-]{0,2}[a-z0-9])+)$)(?:^.{3,64}$)$/;
 export const domainRegex = /(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/g;
